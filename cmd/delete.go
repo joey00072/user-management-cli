@@ -12,8 +12,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var id int
-
 // deleteCmd represents the delete command
 var deleteCmd = &cobra.Command{
 	Use:   "delete",
@@ -26,8 +24,8 @@ var deleteCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(deleteCmd)
-	getCmd.Flags().IntVarP(&id, "id", "f", -1, "specify id")
-	getCmd.MarkFlagRequired("id")
+	// getCmd.Flags().IntVarP(&id, "id", "f", -1, "specify id")
+	// getCmd.MarkFlagRequired("id")
 
 }
 

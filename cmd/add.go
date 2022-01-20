@@ -5,7 +5,10 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"bytes"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 
 	"github.com/spf13/cobra"
 )
@@ -21,28 +24,60 @@ var Status string
 var addCmd = &cobra.Command{
 	Use:   "add",
 	Short: "add new user data",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Long:  `Add new user data by adding flag --name {NAME} --email {EMAIL} --age {AGE} --`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("add called")
+		addUser()
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(addCmd)
-	getCmd.Flags().StringVarP(&Name, "name", "f", "", "specify name")
-	getCmd.MarkFlagRequired("name")
-	getCmd.Flags().StringVarP(&Email, "email", "e", "", "specify email")
-	getCmd.MarkFlagRequired("email")
-	getCmd.Flags().IntVarP(&Age, "age", "a", -1, "specify age")
-	getCmd.MarkFlagRequired("age")
-	getCmd.Flags().StringVarP(&Gender, "gender", "f", "", "specify gender")
-	getCmd.MarkFlagRequired("gender")
-	getCmd.Flags().StringVarP(&Status, "status", "f", "", "specify status")
-	getCmd.MarkFlagRequired("status")
+	addCmd.Flags().StringVarP(&Name, "name", "j", "", "specify name")
+	addCmd.MarkFlagRequired("name")
+	addCmd.Flags().StringVarP(&Email, "email", "e", "", "specify email")
+	addCmd.MarkFlagRequired("email")
+	addCmd.Flags().IntVarP(&Age, "age", "a", -1, "specify age")
+	addCmd.MarkFlagRequired("age")
+	addCmd.Flags().StringVarP(&Gender, "gender", "g", "", "specify gender")
+	addCmd.MarkFlagRequired("gender")
+	addCmd.Flags().StringVarP(&Country, "country", "w", "", "specify country")
+	addCmd.MarkFlagRequired("country")
+	addCmd.Flags().StringVarP(&Status, "status", "q", "", "specify status")
+	addCmd.MarkFlagRequired("status")
+
+}
+
+func addUser() {
+	// fmt.Printf("here")
+	s := fmt.Sprintf(`
+	{
+		"name":"%v",
+		"email":"%v",
+		"age":%v,
+		"gender":"%v",	
+		"country":"%v",
+		"status":"%v"
+
+	}`, Name, Email, Age, Gender, Country, Status) + "\n"
+	fmt.Printf(s)
+	var jsonStr = []byte(s)
+	req, err := http.NewRequest("POST", URL, bytes.NewBuffer(jsonStr))
+	if err != nil {
+		fmt.Println(err)
+	}
+	req.Header.Set("X-Custom-Header", "myvalue")
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	fmt.Println("response Status:", resp.Status)
+	fmt.Println("response Headers:", resp.Header)
+	body, _ := ioutil.ReadAll(resp.Body)
+	fmt.Println("response Body:", string(body))
 
 }
