@@ -24,8 +24,8 @@ var deleteCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(deleteCmd)
-	// getCmd.Flags().IntVarP(&id, "id", "f", -1, "specify id")
-	// getCmd.MarkFlagRequired("id")
+	getCmd.Flags().IntVarP(&id, "id", "f", -1, "specify id")
+	getCmd.MarkFlagRequired("id")
 
 }
 
