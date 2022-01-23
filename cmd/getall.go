@@ -15,7 +15,7 @@ import (
 // getallCmd represents the getall command
 var getallCmd = &cobra.Command{
 	Use:   "getall",
-	Short: "get all users ",
+	Short: "Get all users ",
 	Long:  `Get Infomation of all users in details`,
 	Run: func(cmd *cobra.Command, args []string) {
 		getAllUsers()
@@ -44,23 +44,17 @@ func getAllUsers() {
 		return
 	}
 
-	var users []User
-
 	defer res.Body.Close()
-	json.NewDecoder(res.Body).Decode(&users)
+	json.NewDecoder(res.Body).Decode(&user_models)
 
 	fmt.Println("List of all user: \n---")
-
-	for _, usr := range users {
-
-		fmt.Printf("id : %v\n", usr.Id)
-		fmt.Printf("name : %v\n", usr.Name)
-		fmt.Printf("email : %v\n", usr.Email)
-		fmt.Printf("age : %v\n", usr.Age)
-		fmt.Printf("gender : %v\n", usr.Gender)
-		fmt.Printf("country : %v\n", usr.Country)
-		fmt.Printf("status : %v\n", usr.Status)
-		fmt.Println("---")
-
+	if status := res.StatusCode; status != http.StatusOK {
+		json.NewDecoder(res.Body).Decode(&custom_error)
+		pj, _ := json.MarshalIndent(custom_error, "", "    ")
+		fmt.Println(string(pj))
+	} else {
+		json.NewDecoder(res.Body).Decode(&user_models)
+		pj, _ := json.MarshalIndent(user_models, "", "    ")
+		fmt.Println(string(pj))
 	}
 }
