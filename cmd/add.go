@@ -6,25 +6,18 @@ package cmd
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/spf13/cobra"
 )
 
-var Name string
-var Email string
-var Age int
-var Gender string
-var Country string
-var Status string
-
 // addCmd represents the add command
 var addCmd = &cobra.Command{
 	Use:   "add",
-	Short: "add new user data",
-	Long:  `Add new user data by adding flag --name {NAME} --email {EMAIL} --age {AGE} --`,
+	Short: "Add new user data",
+	Long:  `Add new user data by adding flag --name {NAME} --email {EMAIL} --age {AGE} --gender {GENDER} --country {COUNTRY} --status {STATUS}`,
 	Run: func(cmd *cobra.Command, args []string) {
 		addUser()
 	},
@@ -32,52 +25,47 @@ var addCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(addCmd)
-	addCmd.Flags().StringVarP(&Name, "name", "j", "", "specify name")
+	addCmd.Flags().StringVarP(&user_model.Name, "name", "n", "", "specify name")
 	addCmd.MarkFlagRequired("name")
-	addCmd.Flags().StringVarP(&Email, "email", "e", "", "specify email")
+	addCmd.Flags().StringVarP(&user_model.Email, "email", "e", "", "specify email")
 	addCmd.MarkFlagRequired("email")
-	addCmd.Flags().IntVarP(&Age, "age", "a", -1, "specify age")
+	addCmd.Flags().IntVarP(&user_model.Age, "age", "a", -1, "specify age")
 	addCmd.MarkFlagRequired("age")
-	addCmd.Flags().StringVarP(&Gender, "gender", "g", "", "specify gender")
+	addCmd.Flags().StringVarP(&user_model.Gender, "gender", "g", "", "specify gender")
 	addCmd.MarkFlagRequired("gender")
-	addCmd.Flags().StringVarP(&Country, "country", "w", "", "specify country")
+	addCmd.Flags().StringVarP(&user_model.Country, "country", "c", "", "specify country")
 	addCmd.MarkFlagRequired("country")
-	addCmd.Flags().StringVarP(&Status, "status", "q", "", "specify status")
+	addCmd.Flags().StringVarP(&user_model.Status, "status", "s", "", "specify status")
 	addCmd.MarkFlagRequired("status")
 
 }
 
 func addUser() {
-	// fmt.Printf("here")
-	s := fmt.Sprintf(`
-	{
-		"name":"%v",
-		"email":"%v",
-		"age":%v,
-		"gender":"%v",	
-		"country":"%v",
-		"status":"%v"
+	user_model.Id = 0
+	jsonStr, _ := json.Marshal(user_model)
+	// fmt.Printf((string(jsonStr)))
 
-	}`, Name, Email, Age, Gender, Country, Status) + "\n"
-	fmt.Printf(s)
-	var jsonStr = []byte(s)
 	req, err := http.NewRequest("POST", URL, bytes.NewBuffer(jsonStr))
-	if err != nil {
-		fmt.Println(err)
-	}
-	req.Header.Set("X-Custom-Header", "myvalue")
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
 	if err != nil {
 		panic(err)
 	}
-	defer resp.Body.Close()
+	req.Header.Set("Content-Type", "application/json")
 
-	fmt.Println("response Status:", resp.Status)
-	fmt.Println("response Headers:", resp.Header)
-	body, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println("response Body:", string(body))
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer res.Body.Close()
+	if status := res.StatusCode; status != http.StatusOK {
+		json.NewDecoder(res.Body).Decode(&custom_error)
+		pj, _ := json.MarshalIndent(custom_error, "", "    ")
+		fmt.Println(string(pj))
+	} else {
+		json.NewDecoder(res.Body).Decode(&user_model)
+		fmt.Println("User Added: \n---")
+		pj, _ := json.MarshalIndent(user_model, "", "    ")
+		fmt.Println(string(pj))
+		fmt.Println("---")
+	}
 
 }

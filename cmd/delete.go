@@ -18,40 +18,35 @@ var deleteCmd = &cobra.Command{
 	Short: "Delete user data with id",
 	Long:  `Delete spectfic using by adding flag --id {ID} `,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("delete called")
+		deleteUser()
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(deleteCmd)
-	getCmd.Flags().IntVarP(&id, "id", "f", -1, "specify id")
-	getCmd.MarkFlagRequired("id")
+	deleteCmd.Flags().IntVarP(&user_id, "id", "i", -1, "specify id")
+	deleteCmd.MarkFlagRequired("id")
 
 }
 
-func deleteUser(id int) {
+func deleteUser() {
 
-	fmt.Println(id)
-
-	res, err := http.NewRequest("DELETE", fmt.Sprintf("http://localhost:9010/users/%d", id), nil)
+	req, _ := http.NewRequest("DELETE", fmt.Sprintf("http://localhost:9010/users/%d", user_id), nil)
+	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		fmt.Println(err)
-		return
+		panic(err)
+	}
+	defer res.Body.Close()
+	if status := res.StatusCode; status != http.StatusOK {
+		json.NewDecoder(res.Body).Decode(&custom_error)
+		pj, _ := json.MarshalIndent(custom_error, "", "    ")
+		fmt.Println(string(pj))
+	} else {
+		json.NewDecoder(res.Body).Decode(&user_model)
+		fmt.Println("User Deleted: \n---")
+		pj, _ := json.MarshalIndent(user_model, "", "    ")
+		fmt.Println(string(pj))
+		fmt.Println("---")
 	}
 
-	var user User
-
-	defer res.Body.Close()
-	json.NewDecoder(res.Body).Decode(&user)
-
-	fmt.Println("User: \n---")
-
-	fmt.Printf("id : %v\n", user.Id)
-	fmt.Printf("name : %v\n", user.Name)
-	fmt.Printf("email : %v\n", user.Email)
-	fmt.Printf("age : %v\n", user.Age)
-	fmt.Printf("gender : %v\n", user.Gender)
-	fmt.Printf("country : %v\n", user.Country)
-	fmt.Printf("status : %v\n", user.Status)
-	fmt.Println("---")
 }
