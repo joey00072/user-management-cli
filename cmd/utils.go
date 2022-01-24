@@ -1,6 +1,6 @@
 package cmd
 
-var URL string = "http://localhost:9010/users/"
+var URL string = "http://10.128.243.54:9010/users/"
 
 type User struct {
 	Id      int    `json:"id"`
