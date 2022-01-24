@@ -37,7 +37,7 @@ func init() {
 }
 
 func getAllUsers() {
-	res, err := http.Get("http://localhost:9010/users/")
+	res, err := http.Get(fmt.Sprintf("%v", URL))
 
 	if err != nil {
 		fmt.Println("Error While Fetching Data")

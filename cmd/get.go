@@ -32,7 +32,7 @@ func init() {
 
 func getUser() {
 
-	res, err := http.Get(fmt.Sprintf("http://localhost:9010/users/%d", user_id))
+	res, err := http.Get(fmt.Sprintf("%v%d", URL, user_id))
 	if err != nil {
 		fmt.Println("Error While Fetching Data")
 		return
