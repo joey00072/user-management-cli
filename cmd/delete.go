@@ -31,7 +31,8 @@ func init() {
 
 func deleteUser() {
 
-	req, _ := http.NewRequest("DELETE", fmt.Sprintf("http://localhost:9010/users/%d", user_id), nil)
+	req, _ := http.NewRequest("DELETE", fmt.Sprintf("%v%d", URL, user_id), nil)
+
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		panic(err)
